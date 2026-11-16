@@ -4,6 +4,11 @@ Upload aerial screenshots of a neighborhood, press **Scan**, and get a table of
 the homes found, which ones have rooftop solar, and the addresses that could be
 read from the image. Results can be downloaded as a CSV.
 
+## Requirements
+
+- Node.js 20 or newer
+- An Anthropic API key (only for real scans; the mock detector needs none)
+
 ## Run it
 
 ```bash
@@ -39,6 +44,10 @@ says "No address visible".
 For best results, turn on street and address labels before taking the
 screenshot, and zoom in until individual roofs are clear. The optional location
 field (city, state, ZIP) is appended to each address.
+
+## Project docs
+
+- `AGENTS.md`: instructions for AI coding agents (architecture, rules, commands). `CLAUDE.md` imports it.
 
 ## Known limits
 
