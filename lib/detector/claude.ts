@@ -92,7 +92,10 @@ export const claudeDetector: SolarDetector = {
 
     let response;
     try {
-      response = await client.beta.messages.parse({
+      // Streaming is required here: the SDK refuses a non-streaming request
+      // whose max_tokens could take over 10 minutes. The result is the same
+      // parsed message either way; we just wait for the stream to finish.
+      const stream = client.beta.messages.stream({
         model: MODEL,
         max_tokens: 32000,
         // If the model declines a request, the API retries it on a fallback
@@ -118,7 +121,16 @@ export const claudeDetector: SolarDetector = {
           },
         ],
       });
+      response = await stream.finalMessage();
     } catch (err) {
+      // If the answer is cut off by max_tokens, the half-finished JSON fails to
+      // parse and the SDK throws a plain (non-API) error before we can read
+      // stop_reason. Treat that case as "too many homes".
+      if (!(err instanceof Anthropic.APIError) && /json|parse|unexpected/i.test(String(err))) {
+        throw new Error(
+          "This image has too many homes to report in one pass. Crop it into smaller areas and scan those.",
+        );
+      }
       throw new Error(describeApiError(err));
     }
 
